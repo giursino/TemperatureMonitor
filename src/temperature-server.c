@@ -20,9 +20,8 @@
 #include <sys/un.h>
 #include <unistd.h>
 #include <signal.h>
-#include "config.h"
 #include "libknxusb.h"
-#include "01847-temp.h"
+#include "temperature-server.h"
 
 #ifdef LOCAL
 	#undef LOCAL
@@ -219,7 +218,7 @@ LOCAL void SignalHandlerBeforeConnection(int signo) {
 ///
 int main(int argc, char* argv[]) {
 
-	printf("Welcome to %s.\n", PACKAGE_STRING);
+	printf("Welcome to Temperature Monitor server.\n");
 
 	hid_device* pDevice;
 	int res;

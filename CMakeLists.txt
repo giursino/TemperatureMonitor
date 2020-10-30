@@ -21,10 +21,21 @@
 # SOFTWARE.
 
 cmake_minimum_required (VERSION 3.0)
-project (cmake_template)
-add_subdirectory(src)
+
+project (temeperature-monitor)
+
+include(GNUInstallDirs)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
+
+# libknxusb
+find_package(LibKnxUsb REQUIRED)
+
+# pthread
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+add_subdirectory(src)
 
 # cmocka
 option(ENABLE_TESTS "Perform unit tests after build" OFF)

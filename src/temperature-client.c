@@ -17,8 +17,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
-#include "config.h"
-#include "01847-temp.h"
+#include "temperature-server.h"
 
 #ifdef LOCAL
 	#undef LOCAL
