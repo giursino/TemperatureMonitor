@@ -31,48 +31,63 @@
 #include "temperature-server.c"
 #undef main
 
+const ThreadKnxArgs_Type arg={
+  .pDevice = "dummy device",
+  .socket = 1
+}
 
-int __wrap_printf (const char *format, ...)
+int __wrap_LKU_ReceiveLBusmonMessage(const char* device, char* rxbuf, int rxlen)
 {
-  int param1;
+  check_expected_ptr(device);
+  check_expected_ptr(rxbuf);
+  check_expected_ptr(rxlen);
 
-  /* extract result from vargs ('printf("%d\n", result)') */
-  va_list args;
-  va_start(args, format);
-  param1 = va_arg(args, int);
-  va_end(args);
-
-  /* ensure that parameters match expecteds in expect_*() calls  */
-  check_expected_ptr(format);
-  check_expected(param1);
-
-  /* get mocked return value from will_return() call */
   return mock();
 }
 
-static void test_main(void **state)
+int __wrap_write*(int socket, void* buf, int len)
+{
+  check_expected(socked);
+  check_expected_ptr(buf);
+  check_expected(len);
+
+  return -1;
+}
+
+static void test_rx(void **state)
 {
   int expected = 0;
   int actual;
 
-  /* expect parameters to printf call */
-  expect_string(__wrap_printf, format, "%d\n");
-  expect_value(__wrap_printf, param1, 60);
+  // mock input
+  expect_string(__wrap_LKU_ReceiveLBusmonMessage, device, "dummy device");
+  expect_string(__wrap_LKU_ReceiveLBusmonMessage, rxbuf, "device");
+  expect_value(__wrap_LKU_ReceiveLBusmonMessage, rxlen, 65);
 
-  /* printf should return 3 */
-  will_return(__wrap_printf, 3);
+  will_return(__wrap_LKU_ReceiveLBusmonMessage, 10);
 
-  /* call __real_main as this is main() from program.c */
-  actual = __real_main(0, NULL);
+  // mock - output
+  expect_value(__wrap_write, socket, arg.socket);
 
-  /* assert that main return success */
-  assert_int_equal(expected, actual);
+  SocketData_Type out={
+    .time="time",
+    .track="Ta_giorno",
+    .value=20.1f
+  }
+  expect_memory(__wrap_write, buf, out, sizeof(out));
+
+  expect_value(__wrap_write, len, sizeof(out));
+
+  // RUN
+  actual = ThreadKnxRx(arg);
+
+  //assert_int_equal(expected, actual);
 }
 
 int main()
 {
   const struct CMUnitTest tests[] = {
-    cmocka_unit_test(test_main),
+    cmocka_unit_test(test_rx),
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);
