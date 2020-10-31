@@ -27,6 +27,7 @@
 #include <limits.h>
 #include <setjmp.h>
 #include <cmocka.h>
+#include <string.h>
 
 #define main __real_main
 #include "temperature-server.c"
@@ -44,7 +45,7 @@ int __wrap_LKU_ReceiveLBusmonMessage(const hid_device* device, uint8_t* rxbuf, i
 
   if (rxlen < msglen) return -1;
 
-  memcpy(msg, rxbuf, msglen);
+  memcpy(rxbuf, msg, msglen);
 
   return msglen;
 }
@@ -59,6 +60,20 @@ int __wrap_write(int socket, void* buf, int len)
   return -1;
 }
 
+size_t __wrap_strftime(char *s, size_t max, const char *format, const struct tm *tm)
+{
+  char* time;
+  time = mock_ptr_type(char *);
+  memcpy(s, time, strlen(time));
+  s[strlen(time)]=0;
+
+
+  return strlen(s);
+}
+
+
+
+
 static void test_rx(void **state)
 {
   ThreadKnxArgs_Type arg={
@@ -67,7 +82,7 @@ static void test_rx(void **state)
   };
 
   // mock "LKU_ReceiveLBusmonMessage"
-  uint8_t knxmsg[10]={0xBC, 0x11, 0x21, 0x77, 0xE2, 0x00, 0x80, 0x0C, 0x1A, 0xCC};
+  uint8_t knxmsg[11]={0xBC, 0x11, 0x0F, 0x21, 0x77, 0xE2, 0x00, 0x80, 0x0C, 0x1A, 0xCC};
 
   expect_value(__wrap_LKU_ReceiveLBusmonMessage, device, arg.pDevice);
   will_return(__wrap_LKU_ReceiveLBusmonMessage, cast_to_largest_integral_type(knxmsg));
@@ -78,13 +93,16 @@ static void test_rx(void **state)
   SocketData_Type out={
     .time = "time",
     .track = "Ta_giorno",
-    .value = 20.1f,
+    .value = 20.0f,
   };
 
   expect_value(__wrap_write, socket, arg.socket);
   expect_memory(__wrap_write, buf, &out, sizeof(out));
   expect_value(__wrap_write, len, sizeof(out));
 
+  // mock "strftime"
+  will_return(__wrap_strftime, cast_to_largest_integral_type(out.time));
+  will_return(__wrap_strftime, cast_to_largest_integral_type(out.time));
 
 
   // RUN
