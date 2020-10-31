@@ -32,7 +32,7 @@
 #include "temperature-server.c"
 #undef main
 
-int __wrap_LKU_ReceiveLBusmonMessage(const char* device, uint8_t* rxbuf, int rxlen)
+int __wrap_LKU_ReceiveLBusmonMessage(const hid_device* device, uint8_t* rxbuf, int rxlen)
 {
   check_expected_ptr(device);
 
@@ -61,7 +61,6 @@ int __wrap_write(int socket, void* buf, int len)
 
 static void test_rx(void **state)
 {
-  const char* dd = "dummy_device";
   ThreadKnxArgs_Type arg={
     .pDevice = 0,
     .socket = 1
@@ -70,9 +69,8 @@ static void test_rx(void **state)
   // mock "LKU_ReceiveLBusmonMessage"
   uint8_t knxmsg[10]={0xBC, 0x11, 0x21, 0x77, 0xE2, 0x00, 0x80, 0x0C, 0x1A, 0xCC};
 
-  expect_string(__wrap_LKU_ReceiveLBusmonMessage, device, arg.pDevice);
-  /*will_return(__wrap_LKU_ReceiveLBusmonMessage, cast_to_largest_integral_type(knxmsg));*/
-  will_return(__wrap_LKU_ReceiveLBusmonMessage, knxmsg);
+  expect_value(__wrap_LKU_ReceiveLBusmonMessage, device, arg.pDevice);
+  will_return(__wrap_LKU_ReceiveLBusmonMessage, cast_to_largest_integral_type(knxmsg));
   will_return(__wrap_LKU_ReceiveLBusmonMessage, (sizeof(knxmsg)/sizeof(knxmsg[0])));
 
 
