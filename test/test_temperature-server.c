@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include <stdarg.h>
+#include <stdint.h>
 #include <stddef.h>
 #include <limits.h>
 #include <setjmp.h>
@@ -31,57 +32,65 @@
 #include "temperature-server.c"
 #undef main
 
-const ThreadKnxArgs_Type arg={
-  .pDevice = "dummy device",
-  .socket = 1
-}
-
-int __wrap_LKU_ReceiveLBusmonMessage(const char* device, char* rxbuf, int rxlen)
+int __wrap_LKU_ReceiveLBusmonMessage(const char* device, uint8_t* rxbuf, int rxlen)
 {
   check_expected_ptr(device);
-  check_expected_ptr(rxbuf);
-  check_expected_ptr(rxlen);
 
-  return mock();
+  uint8_t* msg;
+  msg = mock_ptr_type(uint8_t *);
+
+  int msglen;
+  msglen = mock_type(int);
+
+  if (rxlen < msglen) return -1;
+
+  memcpy(msg, rxbuf, msglen);
+
+  return msglen;
 }
 
-int __wrap_write*(int socket, void* buf, int len)
+int __wrap_write(int socket, void* buf, int len)
 {
-  check_expected(socked);
+  check_expected(socket);
   check_expected_ptr(buf);
   check_expected(len);
 
+  // to exit from main loop
   return -1;
 }
 
 static void test_rx(void **state)
 {
-  int expected = 0;
-  int actual;
+  const char* dd = "dummy_device";
+  ThreadKnxArgs_Type arg={
+    .pDevice = 0,
+    .socket = 1
+  };
 
-  // mock input
-  expect_string(__wrap_LKU_ReceiveLBusmonMessage, device, "dummy device");
-  expect_string(__wrap_LKU_ReceiveLBusmonMessage, rxbuf, "device");
-  expect_value(__wrap_LKU_ReceiveLBusmonMessage, rxlen, 65);
+  // mock "LKU_ReceiveLBusmonMessage"
+  uint8_t knxmsg[10]={0xBC, 0x11, 0x21, 0x77, 0xE2, 0x00, 0x80, 0x0C, 0x1A, 0xCC};
 
-  will_return(__wrap_LKU_ReceiveLBusmonMessage, 10);
+  expect_string(__wrap_LKU_ReceiveLBusmonMessage, device, arg.pDevice);
+  /*will_return(__wrap_LKU_ReceiveLBusmonMessage, cast_to_largest_integral_type(knxmsg));*/
+  will_return(__wrap_LKU_ReceiveLBusmonMessage, knxmsg);
+  will_return(__wrap_LKU_ReceiveLBusmonMessage, (sizeof(knxmsg)/sizeof(knxmsg[0])));
 
-  // mock - output
-  expect_value(__wrap_write, socket, arg.socket);
 
+  // mock "write"
   SocketData_Type out={
-    .time="time",
-    .track="Ta_giorno",
-    .value=20.1f
-  }
-  expect_memory(__wrap_write, buf, out, sizeof(out));
+    .time = "time",
+    .track = "Ta_giorno",
+    .value = 20.1f,
+  };
 
+  expect_value(__wrap_write, socket, arg.socket);
+  expect_memory(__wrap_write, buf, &out, sizeof(out));
   expect_value(__wrap_write, len, sizeof(out));
 
-  // RUN
-  actual = ThreadKnxRx(arg);
 
-  //assert_int_equal(expected, actual);
+
+  // RUN
+  ThreadKnxRx(&arg);
 }
 
 int main()
