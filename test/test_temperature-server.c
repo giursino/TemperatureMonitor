@@ -47,6 +47,7 @@ int __wrap_LKU_ReceiveLBusmonMessage(const hid_device* device, uint8_t* rxbuf, i
 
   memcpy(rxbuf, msg, msglen);
 
+
   return msglen;
 }
 
@@ -63,7 +64,9 @@ int __wrap_write(int socket, void* buf, int len)
   check_expected(len);
 
   // to exit from main loop
-  return -1;
+  toexit = true;
+
+  return len;
 }
 
 static void test_rx(void **state)

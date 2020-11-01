@@ -89,7 +89,7 @@ LOCAL void* ThreadKnxRx(void *arg) {
 	hid_device* pDevice = ((ThreadKnxArgs_Type*) arg)->pDevice;
 	int socket = ((ThreadKnxArgs_Type*) arg)->socket;
 
-	while(1) {
+	while(!toexit) {
 		res = LKU_ReceiveLBusmonMessage(pDevice, rxbuf, 65);
 		if (res < 0) {
 			perror("Error receiving data.");
