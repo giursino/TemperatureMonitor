@@ -74,7 +74,7 @@ static void test_rx(void **state)
   };
 
   // mock "LKU_ReceiveLBusmonMessage"
-  uint8_t knxmsg[11]={0xBC, 0x11, 0x0F, 0x21, 0x77, 0xE2, 0x00, 0x80, 0x0C, 0x1A, 0xCC};
+  uint8_t knxmsg[]={0xBC, 0x11, 0x0F, 0x21, 0x77, 0xE2, 0x00, 0x80, 0x0C, 0x1A, 0xCC};
 
   expect_value(__wrap_LKU_ReceiveLBusmonMessage, device, arg.pDevice);
   will_return(__wrap_LKU_ReceiveLBusmonMessage, cast_to_largest_integral_type(knxmsg));
