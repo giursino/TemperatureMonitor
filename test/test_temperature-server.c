@@ -64,11 +64,9 @@ size_t __wrap_strftime(char *s, size_t max, const char *format, const struct tm 
 {
   char* time;
   time = mock_ptr_type(char *);
-  memcpy(s, time, strlen(time));
-  s[strlen(time)]=0;
+  memcpy(s, time, strlen(time)+1);
 
-
-  return strlen(s);
+  return strlen(s)+1;
 }
 
 
