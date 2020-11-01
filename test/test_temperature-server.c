@@ -53,7 +53,13 @@ int __wrap_LKU_ReceiveLBusmonMessage(const hid_device* device, uint8_t* rxbuf, i
 int __wrap_write(int socket, void* buf, int len)
 {
   check_expected(socket);
-  check_expected_ptr(buf);
+
+  char* out_track = ((SocketData_Type *) buf)->track;
+  check_expected_ptr(out_track);
+
+  float out_value = ((SocketData_Type *) buf)->value;
+  check_expected(out_value);
+
   check_expected(len);
 
   // to exit from main loop
@@ -91,11 +97,12 @@ static void test_rx(void **state)
   SocketData_Type out={
     .time = "time",
     .track = "Ta_giorno",
-    .value = 20.0f,
+    .value = 21.0f,
   };
 
   expect_value(__wrap_write, socket, arg.socket);
-  expect_memory(__wrap_write, buf, &out, sizeof(out));
+  expect_string(__wrap_write, out_track, out.track);
+  expect_value(__wrap_write, out_value, out.value);
   expect_value(__wrap_write, len, sizeof(out));
 
   // mock "strftime"
