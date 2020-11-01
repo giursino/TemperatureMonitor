@@ -23,7 +23,7 @@ jobs:
     - name: Install LibKnxUsb
       run: |
         cd ..
-        sudo apt-get install libhidapi-hidraw0 libhidapi-dev libhidapi-hidraw0-dbg udev libncurses5-dev
+        sudo apt-get install libhidapi-hidraw0 libhidapi-dev udev libncurses5-dev
         wget https://github.com/giursino/KnxInterfaceVIMAR01847/releases/download/1.2/knxinterfacevimar01847-1.2.tar.gz
         tar xvfz knxinterfacevimar01847-1.2.tar.gz
         cd knxinterfacevimar01847-1.2
