@@ -3,6 +3,5 @@ add_mocked_test(temperature-server
   MOCKS
     LKU_ReceiveLBusmonMessage
     write
-    strftime
   LINK_LIBRARIES Threads::Threads ${LIBKNXUSB_LIBRARY}
 )

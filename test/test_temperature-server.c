@@ -66,18 +66,6 @@ int __wrap_write(int socket, void* buf, int len)
   return -1;
 }
 
-size_t __wrap_strftime(char *s, size_t max, const char *format, const struct tm *tm)
-{
-  char* time;
-  time = mock_ptr_type(char *);
-  memcpy(s, time, strlen(time)+1);
-
-  return strlen(s)+1;
-}
-
-
-
-
 static void test_rx(void **state)
 {
   ThreadKnxArgs_Type arg={
@@ -104,10 +92,6 @@ static void test_rx(void **state)
   expect_string(__wrap_write, out_track, out.track);
   expect_value(__wrap_write, out_value, out.value);
   expect_value(__wrap_write, len, sizeof(out));
-
-  // mock "strftime"
-  will_return(__wrap_strftime, cast_to_largest_integral_type(out.time));
-  will_return(__wrap_strftime, cast_to_largest_integral_type(out.time));
 
 
   // RUN
