@@ -69,6 +69,18 @@ int __wrap_write(int socket, void* buf, int len)
   return len;
 }
 
+const uint8_t in1[] = {0xBC, 0x11, 0x0F, 0x21, 0x77, 0xE2, 0x00, 0x80, 0x0C, 0x1A, 0xCC};
+const SocketData_Type out1 = {.track = "Ta_giorno", .value = 21.0f};
+
+const uint8_t in2[] = {0xBC, 0x11, 0x0F, 0x21, 0x77, 0xE2, 0x00, 0x80, 0x0C, 0x1A, 0xCC};
+const SocketData_Type out2 = {.track = "Ta_giorno", .value = 21.0f};
+
+typedef struct{const uint8_t* in; const SocketData_Type* out;} test_data_t;
+const test_data_t test_data[]={
+  {in1, &out1},
+  {in2, &out2},
+};
+
 static void test_rx(void **state)
 {
   ThreadKnxArgs_Type arg={
@@ -76,29 +88,24 @@ static void test_rx(void **state)
     .socket = 1
   };
 
-  // mock "LKU_ReceiveLBusmonMessage"
-  uint8_t knxmsg[]={0xBC, 0x11, 0x0F, 0x21, 0x77, 0xE2, 0x00, 0x80, 0x0C, 0x1A, 0xCC};
+  for (int i=0; i<sizeof(test_data)/sizeof(test_data[0]); i++) {
 
-  expect_value(__wrap_LKU_ReceiveLBusmonMessage, device, arg.pDevice);
-  will_return(__wrap_LKU_ReceiveLBusmonMessage, cast_to_largest_integral_type(knxmsg));
-  will_return(__wrap_LKU_ReceiveLBusmonMessage, (sizeof(knxmsg)/sizeof(knxmsg[0])));
-
-
-  // mock "write"
-  SocketData_Type out={
-    .time = "time",
-    .track = "Ta_giorno",
-    .value = 21.0f,
-  };
-
-  expect_value(__wrap_write, socket, arg.socket);
-  expect_string(__wrap_write, out_track, out.track);
-  expect_value(__wrap_write, out_value, out.value);
-  expect_value(__wrap_write, len, sizeof(out));
+    // mock "LKU_ReceiveLBusmonMessage"
+    expect_value(__wrap_LKU_ReceiveLBusmonMessage, device, arg.pDevice);
+    will_return(__wrap_LKU_ReceiveLBusmonMessage, cast_to_largest_integral_type(*test_data[i].in));
+    will_return(__wrap_LKU_ReceiveLBusmonMessage, (sizeof(*test_data[i].in)/sizeof(uint8_t)));
 
 
-  // RUN
-  ThreadKnxRx(&arg);
+    // mock "write"
+    expect_value(__wrap_write, socket, arg.socket);
+    expect_string(__wrap_write, out_track, test_data[i].out->track);
+    expect_value(__wrap_write, out_value, test_data[i].out->value);
+    expect_value(__wrap_write, len, sizeof(test_data[i].out));
+
+
+    // RUN
+    ThreadKnxRx(&arg);
+  }
 }
 
 int main()
