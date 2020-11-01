@@ -16,6 +16,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    
+    - name: Install CMocka
+      run: sudo apt-get install libcmocka0 libcmocka-dev
+      
+    - name: Install LibKnxUsb
+      run: |
+        cd ..
+        sudo apt-get install libhidapi-hidraw0 libhidapi-dev libhidapi-hidraw0-dbg udev libncurses5-dev
+        wget https://github.com/giursino/KnxInterfaceVIMAR01847/releases/download/1.2/knxinterfacevimar01847-1.2.tar.gz
+        tar xvfz knxinterfacevimar01847-1.2.tar.gz
+        cd knxinterfacevimar01847-1.2
+        ./configure
+        make
+        sudo make install
 
     - name: Create Build Environment
       # Some projects don't allow in-source building, so create a separate build directory
