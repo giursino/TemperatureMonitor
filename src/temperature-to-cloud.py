@@ -66,8 +66,13 @@ if __name__ == "__main__":
 
                 if len(data) == 1: continue
 
-                unpacked_data = unpacker.unpack(data)
-                #print >>sys.stderr, 'unpacked:', unpacked_data
+                try:
+                    unpacked_data = unpacker.unpack(data)
+                    #print >>sys.stderr, 'unpacked:', unpacked_data
+                except:
+                    print >>sys.stderr, '! ERROR upacking message, discard it'
+                    continue
+
 
                 t=unpacked_data[0].split(b'\0',1)[0]
                 track=unpacked_data[1].split(b'\0',1)[0]
