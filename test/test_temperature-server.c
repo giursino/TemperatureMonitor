@@ -38,7 +38,7 @@ int __wrap_LKU_ReceiveLBusmonMessage(const hid_device* device, uint8_t* rxbuf, i
   check_expected_ptr(device);
 
   uint8_t* msg;
-  msg = mock_ptr_type(uint8_t *);
+  msg = mock_type(uint8_t *);
 
   int msglen;
   msglen = mock_type(int);
@@ -64,7 +64,7 @@ int __wrap_write(int socket, void* buf, int len)
   check_expected(len);
 
   // to exit from main loop
-  toexit = true;
+  toexit = mock_type(bool);
 
   return len;
 }
@@ -75,10 +75,10 @@ const SocketData_Type out1 = {.track = "Ta_giorno", .value = 21.0f};
 const uint8_t in2[] = {0xBC, 0x11, 0x0F, 0x21, 0x77, 0xE2, 0x00, 0x80, 0x0C, 0x1A, 0xCC};
 const SocketData_Type out2 = {.track = "Ta_giorno", .value = 21.0f};
 
-typedef struct{const uint8_t* in; const SocketData_Type* out;} test_data_t;
+typedef struct{const uint8_t (*in)[]; uint8_t in_len; const SocketData_Type* out;} test_data_t;
 const test_data_t test_data[]={
-  {in1, &out1},
-  {in2, &out2},
+  {&in1, sizeof(in1)/sizeof(uint8_t), &out1},
+  {&in2, sizeof(in2)/sizeof(uint8_t), &out2},
 };
 
 static void test_rx(void **state)
@@ -92,20 +92,27 @@ static void test_rx(void **state)
 
     // mock "LKU_ReceiveLBusmonMessage"
     expect_value(__wrap_LKU_ReceiveLBusmonMessage, device, arg.pDevice);
-    will_return(__wrap_LKU_ReceiveLBusmonMessage, cast_to_largest_integral_type(*test_data[i].in));
-    will_return(__wrap_LKU_ReceiveLBusmonMessage, (sizeof(*test_data[i].in)/sizeof(uint8_t)));
+    will_return(__wrap_LKU_ReceiveLBusmonMessage, test_data[i].in);
+    will_return(__wrap_LKU_ReceiveLBusmonMessage, test_data[i].in_len);
 
 
     // mock "write"
     expect_value(__wrap_write, socket, arg.socket);
     expect_string(__wrap_write, out_track, test_data[i].out->track);
     expect_value(__wrap_write, out_value, test_data[i].out->value);
-    expect_value(__wrap_write, len, sizeof(test_data[i].out));
+    expect_value(__wrap_write, len, sizeof(SocketData_Type));
 
 
-    // RUN
-    ThreadKnxRx(&arg);
+    // to exit from main loop
+    bool toexit = false;
+    if (i == (sizeof(test_data)/sizeof(test_data[0]) - 1)) {
+      toexit = true;
+    }
+    will_return(__wrap_write, toexit);
   }
+
+  // RUN
+  ThreadKnxRx(&arg);
 }
 
 int main()
