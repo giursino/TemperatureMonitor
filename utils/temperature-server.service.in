@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 ExecStart=temperature-server
-WorkingDirectory=@CMAKE_INSTALL_PREFIX@
+WorkingDirectory=@CMAKE_INSTALL_PREFIX@/bin
 StandardOutput=append:/var/log/temperature-monitor.log
 StandardError=append:/var/log/temperature-monitor.log
 Restart=always

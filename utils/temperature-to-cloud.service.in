@@ -5,7 +5,7 @@ After=network.target
 
 [Service]
 ExecStart=/usr/bin/python3 -u temperature-to-cloud.py
-WorkingDirectory=@CMAKE_INSTALL_PREFIX@
+WorkingDirectory=@CMAKE_INSTALL_PREFIX@/bin
 StandardOutput=append:/var/log/temperature-monitor.log
 StandardError=append:/var/log/temperature-monitor.log
 Restart=always
