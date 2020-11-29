@@ -15,3 +15,13 @@ datastore to plot it, using [tago.io](tago.io).
 
 Another client `temperature-to-file.py` written in Python it connects
 to the socket and then write the temperature data to `data.csv` CSV file
+
+# Publish a package
+
+```
+mkdir build
+cd build
+cmake ..
+make package
+make package_source
+```
