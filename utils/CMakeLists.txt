@@ -20,3 +20,10 @@ set(OUT_FILE "temperature-monitor.conf")
 configure_file(${IN_FILE} ${OUT_FILE} @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${OUT_FILE}
     DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/logrotate.d)
+
+# example config file
+set(IN_FILE "temperature-to-cloud.ini")
+set(OUT_FILE "temperature-to-cloud.ini")
+configure_file(${IN_FILE} ${OUT_FILE} @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${OUT_FILE}
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/${CMAKE_PROJECT_NAME}/example)

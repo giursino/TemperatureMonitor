@@ -3,10 +3,9 @@ Description=Temperature monitor server
 After=network.target
 
 [Service]
-ExecStart=temperature-server
-WorkingDirectory=@CMAKE_INSTALL_PREFIX@/bin
-StandardOutput=append:/var/log/temperature-monitor.log
-StandardError=append:/var/log/temperature-monitor.log
+ExecStart=@CMAKE_INSTALL_PREFIX@/bin/temperature-server
+#StandardOutput=append:/var/log/temperature-monitor.log
+#StandardError=append:/var/log/temperature-monitor.log
 Restart=always
 RestartSec=60
 
