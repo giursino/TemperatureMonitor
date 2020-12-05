@@ -45,7 +45,7 @@ int __wrap_LKU_ReceiveLBusmonMessage(const hid_device* device, uint8_t* rxbuf, i
 
   if (rxlen < msglen) return -1;
 
-  memcpy(rxbuf, msg, msglen);
+  memcpy(rxbuf, msg, (size_t) (msglen));
 
 
   return msglen;
@@ -69,26 +69,26 @@ int __wrap_write(int socket, void* buf, int len)
   return len;
 }
 
-const uint8_t in1[] = {0xBC, 0x11, 0x0F, 0x21, 0x77, 0xE2, 0x00, 0x80, 0x0C, 0x1A, 0xCC};
-const SocketData_Type out1 = {.track = "Ta_giorno", .value = 21.0f};
+static const uint8_t in1[] = {0xBC, 0x11, 0x0F, 0x21, 0x77, 0xE2, 0x00, 0x80, 0x0C, 0x1A, 0xCC};
+static const SocketData_Type out1 = {.track = "Ta_giorno", .value = 21.0f};
 
-const uint8_t in2[] = {0xBC, 0x11, 0x0F, 0x21, 0x77, 0xE2, 0x00, 0x80, 0x0C, 0x1A, 0xCC};
-const SocketData_Type out2 = {.track = "Ta_giorno", .value = 21.0f};
+static const uint8_t in2[] = {0xBC, 0x11, 0x0F, 0x21, 0x77, 0xE2, 0x00, 0x80, 0x0C, 0x1A, 0xCC};
+static const SocketData_Type out2 = {.track = "Ta_giorno", .value = 21.0f};
 
 typedef struct{const uint8_t (*in)[]; uint8_t in_len; const SocketData_Type* out;} test_data_t;
-const test_data_t test_data[]={
+static const test_data_t test_data[]={
   {&in1, sizeof(in1)/sizeof(uint8_t), &out1},
   {&in2, sizeof(in2)/sizeof(uint8_t), &out2},
 };
 
-static void test_rx(void **state)
+static void test_rx()
 {
   ThreadKnxArgs_Type arg={
     .pDevice = 0,
     .socket = 1
   };
 
-  for (int i=0; i<sizeof(test_data)/sizeof(test_data[0]); i++) {
+  for (uint i=0; i<sizeof(test_data)/sizeof(test_data[0]); i++) {
 
     // mock "LKU_ReceiveLBusmonMessage"
     expect_value(__wrap_LKU_ReceiveLBusmonMessage, device, arg.pDevice);
