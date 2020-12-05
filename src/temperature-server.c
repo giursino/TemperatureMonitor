@@ -20,6 +20,7 @@
 #include <sys/un.h>
 #include <unistd.h>
 #include <signal.h>
+#include "Config.h"
 #include "libknxusb.h"
 #include "temperature-server.h"
 
@@ -100,7 +101,7 @@ LOCAL void* ThreadKnxRx(void *arg) {
 		struct tm *tm = localtime(&t);
 		char sTime[64];
 		strftime(sTime, sizeof(sTime), "%c", tm);
-		PrintReceivedMsg(sTime, rxbuf, res);
+    PrintReceivedMsg(sTime, rxbuf, (uint8_t)(res));
 
 		// Send to socket
 		SocketData_Type txbuf;
@@ -118,7 +119,7 @@ LOCAL void* ThreadKnxRx(void *arg) {
 		if ((rxbuf[3]==0x21) && (rxbuf[4]==0x77)) {
 			sprintf(txbuf.track, "Ta_giorno");
 			txbuf.value = DptValueTemp2Float(&rxbuf[8]);
-			fprintf(stdout, "*** Zona giorno, Ta=%.1f ***\n", txbuf.value);
+      fprintf(stdout, "*** Zona giorno, Ta=%.1f ***\n", (double) txbuf.value);
 			tosend=true;
 		}
 
@@ -126,7 +127,7 @@ LOCAL void* ThreadKnxRx(void *arg) {
 		if ((rxbuf[3]==0x0C) && (rxbuf[4]==0x60)) {
 			sprintf(txbuf.track, "T_ext");
 			txbuf.value = DptValueTemp2Float(&rxbuf[8]);
-			fprintf(stdout, "*** Temperatura esterna, T=%.1f ***\n", txbuf.value);
+      fprintf(stdout, "*** Temperatura esterna, T=%.1f ***\n", (double) txbuf.value);
 			tosend=true;
 		}
 
@@ -134,7 +135,7 @@ LOCAL void* ThreadKnxRx(void *arg) {
 		if ((rxbuf[3]==0x21) && (rxbuf[4]==0x9D)) {
 			sprintf(txbuf.track, "Ta_notte");
 			txbuf.value = DptValueTemp2Float(&rxbuf[8]);
-			fprintf(stdout, "*** Zona notte, Ta=%.1f ***\n", txbuf.value);
+      fprintf(stdout, "*** Zona notte, Ta=%.1f ***\n", (double) txbuf.value);
 			tosend=true;
 		}
 
@@ -147,7 +148,7 @@ LOCAL void* ThreadKnxRx(void *arg) {
 			else {
 				txbuf.value = 0;
 			}
-			fprintf(stdout, "*** Valvola giorno = %.0f ***\n", txbuf.value);
+      fprintf(stdout, "*** Valvola giorno = %.0f ***\n", (double) txbuf.value);
 			tosend=true;
 		}
 
@@ -160,14 +161,14 @@ LOCAL void* ThreadKnxRx(void *arg) {
 			else {
 				txbuf.value = 0;
 			}
-			fprintf(stdout, "*** Valvola notte = %.0f ***\n", txbuf.value);
+      fprintf(stdout, "*** Valvola notte = %.0f ***\n", (double) txbuf.value);
 			tosend=true;
 		}
 
 
 		if (tosend) {
-			fprintf(stdout, "Sending data: time=\"%s\" track=\"%s\" value=%f\n", txbuf.time, txbuf.track, txbuf.value);
-			if ((res = write(socket, &txbuf, sizeof(txbuf))) != sizeof(txbuf)) {
+      fprintf(stdout, "Sending data: time=\"%s\" track=\"%s\" value=%f\n", txbuf.time, txbuf.track, (double) txbuf.value);
+      if ((res = (int) (write(socket, &txbuf, sizeof(txbuf)))) != sizeof(txbuf)) {
 				if (res > 0)
 					fprintf(stderr, "partial write\n");
 				else {
@@ -216,13 +217,12 @@ LOCAL void SignalHandlerBeforeConnection(int signo) {
 
 /// Main function
 ///
-int main(int argc, char* argv[]) {
+int main(__attribute__ ((unused)) int argc, __attribute__ ((unused)) char* argv[]) {
 
-	printf("Welcome to Temperature Monitor server.\n");
+  printf("Welcome to Temperature Monitor server v%i.%i.%i-%s.\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, GIT_REVISION);
 
 	hid_device* pDevice;
 	int res;
-	int ch;
 
 
 	// Init Lib Knx Usb
@@ -328,7 +328,7 @@ int main(int argc, char* argv[]) {
 	while(!toexit) {
 
 #ifdef NO_DAEMON
-		ch = getchar();
+    int ch = getchar();
 		if (ch == 'q') {
 			toexit = true;
 		}
