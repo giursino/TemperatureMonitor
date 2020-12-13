@@ -4,7 +4,7 @@ Wants=temperatore-server.service
 After=network.target
 
 [Service]
-ExecStart=@CMAKE_INSTALL_PREFIX@/bin/usr/bin/python -u temperature-to-cloud.py
+ExecStart=/bin/usr/bin/python -u @CMAKE_INSTALL_PREFIX@/temperature-to-cloud.py
 WorkingDirectory=@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_SYSCONFDIR@
 #StandardOutput=append:/var/log/temperature-monitor.log
 #StandardError=append:/var/log/temperature-monitor.log
