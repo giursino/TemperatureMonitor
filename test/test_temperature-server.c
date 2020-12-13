@@ -69,16 +69,32 @@ int __wrap_write(int socket, void* buf, int len)
   return len;
 }
 
-static const uint8_t in1[] = {0xBC, 0x11, 0x0F, 0x21, 0x77, 0xE2, 0x00, 0x80, 0x0C, 0x1A, 0xCC};
+static const uint8_t in1[] = {0xBC, 0x20, 0x13, 0x21, 0x77, 0xE3, 0x00, 0x80, 0x0C, 0x1A, 0xCC};
 static const SocketData_Type out1 = {.track = "Ta_giorno", .value = 21.0f};
 
-static const uint8_t in2[] = {0xBC, 0x11, 0x0F, 0x21, 0x77, 0xE2, 0x00, 0x80, 0x0C, 0x1A, 0xCC};
-static const SocketData_Type out2 = {.track = "Ta_giorno", .value = 21.0f};
+static const uint8_t in2[] = {0xBC, 0x20, 0x13, 0x21, 0x8C, 0xE1, 0x00, 0x81, 0xBD};
+static const SocketData_Type out2 = {.track = "Valvola_giorno", .value = 1.0f};
+
+static const uint8_t in3[] = {0xBC, 0x20, 0x13, 0x21, 0x8C, 0xE1, 0x00, 0x80, 0xBC};
+static const SocketData_Type out3 = {.track = "Valvola_giorno", .value = 0.0f};
+
+static const uint8_t in4[] = {0xBC, 0x20, 0x14, 0x21, 0x9D, 0xE3, 0x00, 0x80, 0x07, 0xC1, 0x6E};
+static const SocketData_Type out4 = {.track = "Ta_notte", .value = 19.9f};
+
+static const uint8_t in5[] = {0xBC, 0x20, 0x14, 0x21, 0xB2, 0xE1, 0x00, 0x81, 0x84};
+static const SocketData_Type out5 = {.track = "Valvola_notte", .value = 1.0f};
+
+static const uint8_t in6[] = {0xBC, 0x20, 0x14, 0x21, 0xB2, 0xE1, 0x00, 0x80, 0x85};
+static const SocketData_Type out6 = {.track = "Valvola_notte", .value = 0.0f};
 
 typedef struct{const uint8_t (*in)[]; uint8_t in_len; const SocketData_Type* out;} test_data_t;
 static const test_data_t test_data[]={
   {&in1, sizeof(in1)/sizeof(uint8_t), &out1},
   {&in2, sizeof(in2)/sizeof(uint8_t), &out2},
+  {&in3, sizeof(in3)/sizeof(uint8_t), &out3},
+  {&in4, sizeof(in4)/sizeof(uint8_t), &out4},
+  {&in5, sizeof(in5)/sizeof(uint8_t), &out5},
+  {&in6, sizeof(in6)/sizeof(uint8_t), &out6},
 };
 
 static void test_rx()
