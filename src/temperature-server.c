@@ -142,7 +142,7 @@ LOCAL void* ThreadKnxRx(void *arg) {
 		// Valvola zona giorno
 		if ((rxbuf[3]==0x21) && (rxbuf[4]==0x8C)) {
 			sprintf(txbuf.track, "Valvola_giorno");
-			if (rxbuf[7]==0x84) {
+			if (rxbuf[7]==0x81) {
 				txbuf.value = 1;
 			}
 			else {
