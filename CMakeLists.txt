@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.0)
 # verbose makefile
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
-project (temperature-monitor VERSION 0.1.0)
+project (temperature-monitor VERSION 0.1.1)
 
 # project version
 message(STATUS "Project version: ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
